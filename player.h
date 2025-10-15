@@ -7,6 +7,7 @@
 
 typedef struct Song{
     char songName[256];  // Fixed-size array for song name otherwise can't strcpy -> segmentation fault because uninitialised memory
+    Mix_Music *music;
 } Song;
 
 typedef struct Player{
@@ -15,6 +16,7 @@ typedef struct Player{
     int numberOfSongs;
     Song* nextSong;
     Song* previousSong;
+    char currentDir[512];
 } Player;
 
 typedef struct {
@@ -27,7 +29,7 @@ typedef struct FileManager{
 
 int Player_init(Player *self);
 void Player_listSongs(Player *self);
-void Player_play(Player *self);
+int Player_play(Player *self, int i);
 void Player_pause(Player *self);
 void Player_resume(Player *self);
 void Player_stop(Player *self);
