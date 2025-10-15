@@ -39,7 +39,4 @@ void Player_previous(Player *self);
 void Song_init(Song *self);
 void Song_getStatus(Song *self);
 
-void UI_init(UI *self);
-void UI_showMenu(Player *self);
-
-void FileManager_init(FileManager *self);
+void display_menu();

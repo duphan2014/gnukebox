@@ -80,21 +80,21 @@ int Player_play(Player *self, int i) {
         SDL_Quit();
         return 1;
     }
-    printf("Currently Playing: %s\n", filename);
+    printf("Playing: %s\n", filename);
     Mix_PlayMusic(music, 1);
 }
 
 void Player_pause(Player *self) {
     Mix_PauseMusic();
-    printf("Paused.\n");
+    printf("Paused: %s\n", self->currentSong->songName);
 }
 void Player_resume(Player *self) {
     Mix_ResumeMusic();
-    printf("Resumed.\n");
+    printf("Resumed: %s\n", self->currentSong->songName);
 }
 void Player_stop(Player *self) {
     Mix_HaltMusic();
-    printf("Stopped.\n");
+    printf("Stopped: %s\n", self->currentSong->songName);
 }
 void Player_next(Player *self) {
 
@@ -103,6 +103,14 @@ void Player_previous(Player *self) {
 
 }
 
+void display_menu(){
+    printf("== gnukebox ==\n");
+    printf("  L to list songs\n");
+    printf("  P to play song\n");
+    printf("  p to pause\n");
+    printf("  s to stop\n");
+    printf("  q to quit\n");
+}
 
 int main() {
     Player player;
@@ -111,36 +119,62 @@ int main() {
 
     Player_init(&player);
 
-    printf("== gnukebox ==\n");
-    printf("  L to list songs\n");
-    printf("  P to play song\n");
-    printf("  p to pause\n");
-    printf("  s to stop\n");
-    printf("  q to quit\n");
+    system("clear");
+
+    display_menu();
+    printf("\n> ");
 
     char cmd;
     while (running) {
-        printf("\n> ");
         cmd = getchar();
 
         if (cmd == 'q') {
-            system("cls");
+            system("clear");
             break;
         } else if (cmd == 'L') {
             Player_listSongs(&player);
+
+            printf("\n> ");
         } else if (cmd == 'P') {
-            printf("Enter song index: ");
+            system("clear");
+            Player_listSongs(&player);
+
+            printf("\n> ");
+
+            printf("Enter song index to play: ");
             int index;
             scanf("%d", &index);
             Player_play(&player, index);
-        } else if (cmd == 'p') {
-            Player_pause(&player);
-        } else if (cmd == 'r') {
-            Player_resume(&player);
-        } else if (cmd == 's') {
-            Player_stop(&player);
-        }
 
+            printf("\n> ");
+        } else if (cmd == 'p') {
+            system("clear");
+            Player_listSongs(&player);
+
+            printf("\n");
+
+            Player_pause(&player);
+
+            printf("\n> ");
+        } else if (cmd == 'r') {
+            system("clear");
+            Player_listSongs(&player);
+
+            printf("\n");
+
+            Player_resume(&player);
+
+            printf("\n> ");
+        } else if (cmd == 's') {
+            system("clear");
+            Player_listSongs(&player);
+            
+            printf("\n");
+            
+            Player_stop(&player);
+
+            printf("\n> ");
+        }
     }
 
     Mix_HaltMusic();
