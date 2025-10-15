@@ -57,6 +57,8 @@ int Player_init(Player *self) {
         SDL_Quit();
         return 1;
     }
+    
+    return 0;  // Success
 }
 
 void Player_listSongs(Player *self) {
@@ -67,7 +69,15 @@ void Player_listSongs(Player *self) {
 }
 
 int Player_play(Player *self, int i) {
+    if (i == self->numberOfSongs) {
+        i = 0;
+    } else if (i == -1){
+        i = self->numberOfSongs-1;
+    }
+
+    self->currentSongIndex = i;
     self->currentSong = &self->songs[i];
+
     char * filename = self->currentSong->songName;
     char song_path[512];
     snprintf(song_path, sizeof(song_path), "/home/pc/Music/%s", filename);
@@ -75,32 +85,38 @@ int Player_play(Player *self, int i) {
     music = Mix_LoadMUS(song_path);
     //printf("%s", song_path);
     if (!music) {
-        printf("Could not load %s\n", filename, Mix_GetError());
-        Mix_CloseAudio();
-        SDL_Quit();
+        printf("Could not load %s: %s\n", filename, Mix_GetError());
+        //Mix_CloseAudio();
+        //SDL_Quit();
         return 1;
     }
-    printf("Playing: %s\n", filename);
+    printf("Playing: %d. %s\n", self->currentSongIndex, self->currentSong->songName);
     Mix_PlayMusic(music, 1);
+    self->status = PLAYING;
+    return 0;
 }
 
 void Player_pause(Player *self) {
     Mix_PauseMusic();
+    self->status = PAUSED;
     printf("Paused: %s\n", self->currentSong->songName);
 }
 void Player_resume(Player *self) {
     Mix_ResumeMusic();
+    self->status = PLAYING;
     printf("Resumed: %s\n", self->currentSong->songName);
 }
 void Player_stop(Player *self) {
     Mix_HaltMusic();
+    self->status = STOPPED;
     printf("Stopped: %s\n", self->currentSong->songName);
 }
 void Player_next(Player *self) {
-
+    Player_play(self, self->currentSongIndex + 1);
 }
-void Player_previous(Player *self) {
 
+void Player_last(Player *self) {
+    Player_play(self, self->currentSongIndex - 1);
 }
 
 void display_menu(){
@@ -110,6 +126,8 @@ void display_menu(){
     printf("  p to pause\n");
     printf("  s to stop\n");
     printf("  q to quit\n");
+    printf("  n to play next song\n");
+    printf("  l to play last song\n");
 }
 
 int main() {
@@ -172,6 +190,24 @@ int main() {
             printf("\n");
             
             Player_stop(&player);
+
+            printf("\n> ");
+        } else if (cmd == 'n') {
+            system("clear");
+            Player_listSongs(&player);
+            
+            printf("\n");
+            
+            Player_next(&player);
+
+            printf("\n> ");
+        } else if (cmd == 'l') {
+            system("clear");
+            Player_listSongs(&player);
+            
+            printf("\n");
+            
+            Player_last(&player);
 
             printf("\n> ");
         }

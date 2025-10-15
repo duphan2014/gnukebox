@@ -5,23 +5,25 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
 
+typedef enum PlayerStatus {
+    PLAYING,
+    PAUSED,
+    STOPPED
+} PlayerStatus;
+
 typedef struct Song{
     char songName[256];  // Fixed-size array for song name otherwise can't strcpy -> segmentation fault because uninitialised memory
     Mix_Music *music;
 } Song;
 
 typedef struct Player{
-    Song songs[50];
+    Song songs[200];
     Song* currentSong;
     int numberOfSongs;
-    Song* nextSong;
-    Song* previousSong;
     char currentDir[512];
+    PlayerStatus status;
+    int currentSongIndex;
 } Player;
-
-typedef struct {
-
-} UI;
 
 typedef struct FileManager{
 
@@ -34,7 +36,7 @@ void Player_pause(Player *self);
 void Player_resume(Player *self);
 void Player_stop(Player *self);
 void Player_next(Player *self);
-void Player_previous(Player *self);
+void Player_last(Player *self);
 
 void Song_init(Song *self);
 void Song_getStatus(Song *self);
