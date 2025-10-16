@@ -5,8 +5,7 @@ int DEBUG = 0;
 int Player_init(Player *self) {
     if (DEBUG) printf("Player_init 1\n");
     self->numberOfSongs = 0;  // Initialize to 0
-    struct dirent *entry;
-    
+
     // Get the home directory path
     char *home_dir = getenv("HOME");
     char music_path[512];
@@ -15,6 +14,35 @@ int Player_init(Player *self) {
         snprintf(music_path, sizeof(music_path), "%s/Music", home_dir);
     } else {
         strcpy(music_path, "./");  // Fallback to current directory
+    }
+
+    // load default directory e.g. /home/pc/Music
+    Player_loadFolder(self, music_path);
+
+    if (SDL_Init(SDL_INIT_AUDIO) < 0) {
+        printf("SDL_Init Error: %s\n", SDL_GetError());
+        return 1;
+    }
+
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2040) < 0) {
+        printf("Mix_openAudio Error: %s\n", Mix_GetError());
+        SDL_Quit();
+        return 1;
+    }
+    
+    return 0;  // Success
+}
+
+int Player_loadFolder(Player *self, char *music_path){
+    struct dirent *entry;
+
+    // Reset the songs array before loading new folder
+    self->numberOfSongs = 0;  // Reset song count
+    
+    // Clear all song names in the array
+    for (int i = 0; i < 200; i++) { 
+        memset(self->songs[i].songName, 0, sizeof(self->songs[i].songName));
+        self->songs[i].music = NULL;  // Reset music pointer
     }
 
     strcpy(self->currentDir, music_path);
@@ -46,19 +74,7 @@ int Player_init(Player *self) {
 
     if (DEBUG) printf("self->numberOfSongs %i\n", self->numberOfSongs);
 
-
-    if (SDL_Init(SDL_INIT_AUDIO) < 0) {
-        printf("SDL_Init Error: %s\n", SDL_GetError());
-        return 1;
-    }
-
-    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2040) < 0) {
-        printf("Mix_openAudio Error: %s\n", Mix_GetError());
-        SDL_Quit();
-        return 1;
-    }
-    
-    return 0;  // Success
+    return 0;
 }
 
 void Player_listSongs(Player *self) {
@@ -119,6 +135,13 @@ void Player_last(Player *self) {
     Player_play(self, self->currentSongIndex - 1);
 }
 
+void Player_changeFolder(Player *self, char* path) {
+    printf("Player changed to new path: %s\n", path);
+    strcpy(self->currentDir, path);
+
+    Player_loadFolder(self, path);
+}
+
 void display_menu(){
     printf("== gnukebox ==\n");
     printf("  L to list songs\n");
@@ -128,6 +151,7 @@ void display_menu(){
     printf("  q to quit\n");
     printf("  n to play next song\n");
     printf("  l to play last song\n");
+    printf("  c to change folder\n");
 }
 
 int main() {
@@ -208,6 +232,19 @@ int main() {
             printf("\n");
             
             Player_last(&player);
+
+            printf("\n> ");
+        } else if (cmd == 'c') {
+            system("clear");
+            Player_listSongs(&player);
+
+            printf("\n> ");
+
+            printf("Current Dir: %s\n", player.currentDir);
+            printf("Enter folder path to change to: ");
+            char path[512];
+            scanf("%s", path);
+            Player_changeFolder(&player, path);
 
             printf("\n> ");
         }

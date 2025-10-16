@@ -30,6 +30,7 @@ typedef struct FileManager{
 } FileManager;
 
 int Player_init(Player *self);
+int Player_loadFolder(Player *self, char *music_path);
 void Player_listSongs(Player *self);
 int Player_play(Player *self, int i);
 void Player_pause(Player *self);
@@ -37,6 +38,7 @@ void Player_resume(Player *self);
 void Player_stop(Player *self);
 void Player_next(Player *self);
 void Player_last(Player *self);
+void Player_changeFolder(Player *self, char* path);
 
 void Song_init(Song *self);
 void Song_getStatus(Song *self);
